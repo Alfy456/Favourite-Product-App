@@ -9,18 +9,27 @@
     android:layout_margin="10dp"
     android:elevation="20dp"
     app:cardCornerRadius="20dp"
+    android:layout_weight="1"
     app:cardBackgroundColor="@android:color/background_light"
     tools:context=".adapter.ProductsAdapter">
 
     <TextView
         android:id="@+id/txt_pdt_name"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:text="@string/product_name"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_gravity="center"
+        android:layout_gravity="left"
         android:padding="10dp"
         android:textColor="@color/black"/>
+
+    <ImageView
+        android:id="@+id/img_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_delete"/>
 
 </androidx.cardview.widget.CardView>

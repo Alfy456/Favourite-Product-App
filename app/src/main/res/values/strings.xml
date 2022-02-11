@@ -1,8 +1,14 @@
 <resources>
-    <string name="app_name">Lab_1_2_alfygeorge_C0836170_Android2</string>
+    <string name="app_name">Lab_1_2_alfygeorge_C0836170_Android</string>
     <string name="product_name">AZUZ</string>
     <string name="product_name_title">Product Name</string>
     <string name="description">product description</string>
-    <string name="product_price">Product Price</string>
     <string name="location">location</string>
+    <string name="add_a_new_product">ADD A NEW PRODUCT</string>
+    <string name="enter_product_name">Enter Product Name</string>
+    <string name="pdt_description">Description</string>
+    <string name="product_price">Product Price</string>
+    <string name="add_product">Add Product</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
 </resources>

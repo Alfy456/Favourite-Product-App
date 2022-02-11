@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/drawable/edittext_bg.xml" value="0.1465" />
         <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/drawable/ic_add.xml" value="0.125" />
         <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/drawable/ic_save.xml" value="0.125" />
+        <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/layout/activity_add_product.xml" value="0.22" />
         <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/layout/activity_product_detail.xml" value="0.20416666666666666" />
         <entry key="..\:/MADT/2nd Sem/Android 1/Lab_1_2_alfygeorge_C0836170_Android2/app/src/main/res/layout/layout_products_items.xml" value="0.20416666666666666" />

@@ -12,9 +12,16 @@ import android.view.View;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.database.RoomDB;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.databinding.ActivityProductDetailBinding;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.model.Products;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +34,22 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     private GoogleMap mMap;
     List<Products> productsList = new ArrayList<>();
     RoomDB database;
+
+    private static final String TAG = "MainActivity";
+    private static final int REQUEST_CODE = 1;
+    public static final int UPDATE_INTERVAl = 5000;
+    public static final int FASTEST_INTERVAl = 3000;
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+
+    private List<String> permissionToRequest;
+    private List<String> permissions = new ArrayList<>();
+    private List<String> permissionsRejected = new ArrayList<>();
+
+    private Marker favMarker,userMarker;
+    private List<Marker> markerList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +66,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
         binding.pdtDesc.setText(productsList.get(0).getProduct_description());
         binding.pdtPrice.setText(productsList.get(0).getProduct_price());
         findUserAddress(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -64,9 +88,9 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
             @Override
             public void onClick(View view) {
 
-                productsList.clear();
-
+                productsList = database.mainDAO().getAllProducts();
                 Intent intent = new Intent(ProductDetailActivity.this,MainActivity.class);
+                intent.putExtra("products",products);
                 startActivityForResult(intent,102);
             }
         });
@@ -76,6 +100,17 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
+
+         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        LatLng latLng = null;
+        // Add a marker in Sydney and move the camera
+     //   log
+       // if (products.getProduct_latitude()== 0.0 || products.getProduct_longitude() == 0.0){
+            latLng = new LatLng(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
+       // }
+         mMap.addMarker(new MarkerOptions().position(latLng).title("Product provider location"));
+         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
+
     }
 
     private  void  findUserAddress(double latitude,double longitude){
@@ -98,7 +133,6 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void addProducts() {
-
         database.mainDAO().insert(new Products("Samsung Galaxy Book Go 14",
                 "Samsung Galaxy Book Go 14\" Laptop - Qualcomm Snapdragon 7c, 4GB DDR4, 128GB SSD, Win 11 Home (CAD Warranty)",
                 "299.99",

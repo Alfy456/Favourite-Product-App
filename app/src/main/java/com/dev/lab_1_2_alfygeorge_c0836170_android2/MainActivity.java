@@ -2,14 +2,19 @@ package com.dev.lab_1_2_alfygeorge_c0836170_android2;
 
 import static android.content.ContentValues.TAG;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.adapter.ProductsAdapter;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.database.RoomDB;
@@ -27,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     RoomDB database;
     Products products;
     ProductsAdapter adapter;
+    Products selectedNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,18 +43,52 @@ public class MainActivity extends AppCompatActivity {
         //initialize database
         database = RoomDB.getInstance(this);
 
-        productsList.clear();
+
+        try {
+            products = (Products) getIntent().getSerializableExtra("products");
+            database.mainDAO().insert(products);
+            productsList.clear();
+            productsList.addAll(database.mainDAO().getAllProducts());
+            adapter.notifyDataSetChanged();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         productsList = database.mainDAO().getAllProducts();
         updateRecycler(productsList);
 
         binding.fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
+                Intent intent = new Intent(MainActivity.this,AddProductActivity.class);
+                startActivityForResult(intent,103);
 
             }
         });
+
+        binding.searchbar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
+            }
+        });
+    }
+
+    private void filter(String newText) {
+        List<Products> filterList = new ArrayList<>();
+        for (Products singleProduct :
+                productsList) {
+            if (singleProduct.getProduct_name().toLowerCase().contains(newText.toLowerCase())
+                    || singleProduct.getProduct_description().toLowerCase().contains(newText.toLowerCase())){
+                filterList.add(singleProduct);
+            }
+        }
+        adapter.filterList(filterList);
     }
 
     private void updateRecycler(List<Products> productsList) {
@@ -68,6 +108,31 @@ private  final ProductsClickListener productsClickListener = new ProductsClickLi
         startActivityForResult(intent,101);
 
     }
-        };
 
+    @Override
+    public void onClickDelete(Products products, ImageView imageView) {
+        selectedNote = new Products();
+        selectedNote = products;
+        database.mainDAO().delete(selectedNote);
+        productsList.remove(selectedNote);
+        adapter.notifyDataSetChanged();
+
+        Toast.makeText(MainActivity.this, "Note Deleted", Toast.LENGTH_SHORT).show();
+    }
+};
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==103){
+            if (resultCode == Activity.RESULT_OK){
+                Products new_products = (Products) data.getSerializableExtra("products");
+                database.mainDAO().insert(new_products);
+                productsList.clear();
+                productsList.addAll(database.mainDAO().getAllProducts());
+                adapter.notifyDataSetChanged();
+            }
+        }
+
+    }
 }
