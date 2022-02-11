@@ -1,20 +1,34 @@
 package com.dev.lab_1_2_alfygeorge_c0836170_android2;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.database.RoomDB;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.databinding.ActivityProductDetailBinding;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.model.Products;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -22,6 +36,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +50,6 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     List<Products> productsList = new ArrayList<>();
     RoomDB database;
 
-    private static final String TAG = "MainActivity";
     private static final int REQUEST_CODE = 1;
     public static final int UPDATE_INTERVAl = 5000;
     public static final int FASTEST_INTERVAl = 3000;
@@ -43,13 +57,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
-
-    private List<String> permissionToRequest;
-    private List<String> permissions = new ArrayList<>();
-    private List<String> permissionsRejected = new ArrayList<>();
-
-    private Marker favMarker,userMarker;
-    private List<Marker> markerList = new ArrayList<>();
+    LatLng latLng = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,8 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
         binding.pdtPrice.setText(productsList.get(0).getProduct_price());
         findUserAddress(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
 
+        latLng = new LatLng(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -78,6 +88,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
             binding.pdtTitle.setText(products.getProduct_name());
             binding.pdtDesc.setText(products.getProduct_description());
             binding.pdtPrice.setText(products.getProduct_price());
+            latLng = new LatLng(products.getProduct_latitude(),products.getProduct_longitude());
 
             findUserAddress(products.getProduct_latitude(), products.getProduct_longitude());
         }catch (Exception e){
@@ -95,6 +106,10 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
             }
         });
 
+        //instantiation
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+
     }
 
     @Override
@@ -102,14 +117,17 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
         mMap = googleMap;
 
          mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        LatLng latLng = null;
+
         // Add a marker in Sydney and move the camera
-     //   log
-       // if (products.getProduct_latitude()== 0.0 || products.getProduct_longitude() == 0.0){
-            latLng = new LatLng(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
-       // }
-         mMap.addMarker(new MarkerOptions().position(latLng).title("Product provider location"));
-         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
+             mMap.addMarker(new MarkerOptions().position(latLng).title("Product provider location"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
+
+        if (!isGranted()) {
+            requestLocationPermission();
+        } else {
+            //startUpdateLocation();
+        }
+
 
     }
 
@@ -184,4 +202,82 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
                 43.78943912013543, -79.23985345839043));
 
     }
+
+
+    private void startUpdateLocation() {
+        //location request
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(UPDATE_INTERVAl);
+        locationRequest.setFastestInterval(FASTEST_INTERVAl);
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                // mMap.clear();
+                Location location = locationResult.getLastLocation();
+
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                 mMap.addMarker(new MarkerOptions().position(latLng).title("User Location"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            }
+
+            @Override
+            public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+        };
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+
+
+    }
+
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(this
+                ,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},REQUEST_CODE);
+
+
+    }
+
+    private boolean isGranted() {
+        return ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) ==
+                (PackageManager.PERMISSION_GRANTED);
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (REQUEST_CODE == requestCode){
+
+
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
+                new AlertDialog.Builder(this).setMessage("Accessing the location is mandatory")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ActivityCompat.requestPermissions(ProductDetailActivity.this
+                                        ,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},REQUEST_CODE);
+
+                            }
+                        }).setNegativeButton("Cancel",null)
+                        .create()
+                        .show();
+
+
+            }else {
+                startUpdateLocation();
+            }
+        }
+    }
+
 }
