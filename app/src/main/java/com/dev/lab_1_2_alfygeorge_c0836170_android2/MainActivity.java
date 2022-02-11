@@ -21,6 +21,7 @@ import com.dev.lab_1_2_alfygeorge_c0836170_android2.database.RoomDB;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.databinding.ActivityMainBinding;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.listener.ProductsClickListener;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.model.Products;
+import com.dev.lab_1_2_alfygeorge_c0836170_android2.utils.SharedPrefHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,18 +43,29 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize database
         database = RoomDB.getInstance(this);
-
-
         try {
-            products = (Products) getIntent().getSerializableExtra("products");
-            database.mainDAO().insert(products);
+            products =  (Products) getIntent().getSerializableExtra("products_update");
+        database.mainDAO().update(products.getProduct_id(),products.getProduct_name(),products.getProduct_description(),products.getProduct_price(),products.getProduct_latitude(),products.getProduct_longitude());
             productsList.clear();
             productsList.addAll(database.mainDAO().getAllProducts());
-            adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        try {
+           // if(!SharedPrefHelper.getInstance(getApplicationContext()).getBolIsSaved()) {
+                products = (Products) getIntent().getSerializableExtra("products");
+                database.mainDAO().insert(products);
+                productsList.clear();
+                productsList.addAll(database.mainDAO().getAllProducts());
+                adapter.notifyDataSetChanged();
+                //SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(false);
+           // }
         }catch (Exception e){
             e.printStackTrace();
         }
         productsList = database.mainDAO().getAllProducts();
+        binding.txtPdtNo.setText("No. of Products :"+productsList.size());
         updateRecycler(productsList);
 
         binding.fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -103,10 +115,11 @@ private  final ProductsClickListener productsClickListener = new ProductsClickLi
     @Override
     public void onClick(Products products) {
 
-        Intent intent = new Intent(MainActivity.this,ProductDetailActivity.class);
-        intent.putExtra("products",products);
-        startActivityForResult(intent,101);
-
+      if(!SharedPrefHelper.getInstance(getApplicationContext()).getBolIsSaved()) {
+            Intent intent = new Intent(MainActivity.this, ProductDetailActivity.class);
+            intent.putExtra("products", products);
+            startActivityForResult(intent, 101);
+       }
     }
 
     @Override
@@ -118,6 +131,13 @@ private  final ProductsClickListener productsClickListener = new ProductsClickLi
         adapter.notifyDataSetChanged();
 
         Toast.makeText(MainActivity.this, "Note Deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onClickEdit(Products products, ImageView imageView) {
+        Intent intent = new Intent(MainActivity.this,UpdateProductActivity.class);
+        intent.putExtra("products_update",products);
+        startActivity(intent);
     }
 };
 

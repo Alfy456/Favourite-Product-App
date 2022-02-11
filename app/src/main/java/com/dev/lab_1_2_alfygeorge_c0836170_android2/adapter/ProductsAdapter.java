@@ -53,6 +53,13 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsViewHolder> {
                 listener.onClickDelete(productsList.get(holder.getAdapterPosition()),holder.img_delete);
             }
         });
+
+        holder.img_edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onClickEdit(productsList.get(holder.getAdapterPosition()),holder.img_edit);
+            }
+        });
     }
 
     @Override
@@ -70,7 +77,7 @@ class ProductsViewHolder extends RecyclerView.ViewHolder{
 
     CardView card_pdt;
     TextView txt_pdt_name;
-    ImageView img_delete;
+    ImageView img_delete,img_edit;
 
     public ProductsViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -78,5 +85,6 @@ class ProductsViewHolder extends RecyclerView.ViewHolder{
         card_pdt = itemView.findViewById(R.id.card_pdt);
         txt_pdt_name = itemView.findViewById(R.id.txt_pdt_name);
         img_delete = itemView.findViewById(R.id.img_delete);
+        img_edit = itemView.findViewById(R.id.img_edit);
     }
 }

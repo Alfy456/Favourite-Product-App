@@ -11,4 +11,7 @@
     <string name="add_product">Add Product</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
+    <string name="update">UPDATE</string>
+    <string name="update_product">Update Product</string>
+    <string name="no_of_products">No. of products</string>
 </resources>

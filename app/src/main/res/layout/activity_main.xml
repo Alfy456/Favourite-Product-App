@@ -10,20 +10,33 @@
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:id="@+id/searchbar"
-        android:layout_margin="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:background="@android:color/darker_gray"
-        app:queryHint="Search notes..."
         app:iconifiedByDefault="false"
-        android:layout_alignParentTop="true"/>
+        app:queryHint="Search notes..." />
 
+    <TextView
+        android:id="@+id/txt_pdt_no"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/no_of_products"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:layout_below="@+id/searchbar"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/searchbar"
+        android:layout_below="@+id/txt_pdt_no"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"

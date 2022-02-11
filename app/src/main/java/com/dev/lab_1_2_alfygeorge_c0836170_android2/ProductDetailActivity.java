@@ -23,6 +23,7 @@ import android.view.View;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.database.RoomDB;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.databinding.ActivityProductDetailBinding;
 import com.dev.lab_1_2_alfygeorge_c0836170_android2.model.Products;
+import com.dev.lab_1_2_alfygeorge_c0836170_android2.utils.SharedPrefHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
@@ -59,6 +60,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     private LocationCallback locationCallback;
     LatLng latLng = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,15 +69,25 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
 
         //initialize database
         database = RoomDB.getInstance(this);
-        addProducts();
-        productsList = database.mainDAO().getAllProducts();
 
-        binding.pdtTitle.setText(productsList.get(0).getProduct_name());
-        binding.pdtDesc.setText(productsList.get(0).getProduct_description());
-        binding.pdtPrice.setText(productsList.get(0).getProduct_price());
-        findUserAddress(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
+        if(SharedPrefHelper.getInstance(getApplicationContext()).getBolIsSaved()) {
+            addProducts();
+            productsList = database.mainDAO().getAllProducts();
+            binding.pdtTitle.setText(productsList.get(0).getProduct_name());
+            binding.pdtDesc.setText(productsList.get(0).getProduct_description());
+            binding.pdtPrice.setText(productsList.get(0).getProduct_price());
+            findUserAddress(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
 
-        latLng = new LatLng(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
+            latLng = new LatLng(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
+
+
+            SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(false);
+        }else {
+            SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(true);
+        }
+
+
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -99,10 +111,14 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
             @Override
             public void onClick(View view) {
 
-                productsList = database.mainDAO().getAllProducts();
-                Intent intent = new Intent(ProductDetailActivity.this,MainActivity.class);
-                intent.putExtra("products",products);
-                startActivityForResult(intent,102);
+
+                    Intent intent = new Intent(ProductDetailActivity.this, MainActivity.class);
+                    intent.putExtra("products", products);
+                    startActivityForResult(intent, 102);
+                    SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(false);
+
+
+
             }
         });
 
@@ -151,6 +167,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void addProducts() {
+
         database.mainDAO().insert(new Products("Samsung Galaxy Book Go 14",
                 "Samsung Galaxy Book Go 14\" Laptop - Qualcomm Snapdragon 7c, 4GB DDR4, 128GB SSD, Win 11 Home (CAD Warranty)",
                 "299.99",
@@ -201,6 +218,8 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
                 "299.99",
                 43.78943912013543, -79.23985345839043));
 
+
+        SharedPrefHelper.getInstance(this).setBolIsSaved(true);
     }
 
 
