@@ -70,7 +70,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
         //initialize database
         database = RoomDB.getInstance(this);
 
-        if(SharedPrefHelper.getInstance(getApplicationContext()).getBolIsSaved()) {
+        if(!SharedPrefHelper.getInstance(getApplicationContext()).getBolIsSaved()) {
             addProducts();
             productsList = database.mainDAO().getAllProducts();
             binding.pdtTitle.setText(productsList.get(0).getProduct_name());
@@ -79,14 +79,39 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
             findUserAddress(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
 
             latLng = new LatLng(productsList.get(0).getProduct_latitude(), productsList.get(0).getProduct_longitude());
-
-
-            SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(false);
-        }else {
             SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(true);
+
+
+        }else {
+            products = new Products();
+            try {
+                products = (Products) getIntent().getSerializableExtra("products");
+                binding.pdtTitle.setText(products.getProduct_name());
+                binding.pdtDesc.setText(products.getProduct_description());
+                binding.pdtPrice.setText(products.getProduct_price());
+                latLng = new LatLng(products.getProduct_latitude(), products.getProduct_longitude());
+
+                findUserAddress(products.getProduct_latitude(), products.getProduct_longitude());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
 
+
+            binding.imgShowAll.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+
+                    Intent intent = new Intent(ProductDetailActivity.this, MainActivity.class);
+                    intent.putExtra("products", products);
+                    startActivityForResult(intent, 102);
+
+
+
+                }
+            });
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -94,36 +119,8 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        products = new Products();
-        try {
-            products = (Products) getIntent().getSerializableExtra("products");
-            binding.pdtTitle.setText(products.getProduct_name());
-            binding.pdtDesc.setText(products.getProduct_description());
-            binding.pdtPrice.setText(products.getProduct_price());
-            latLng = new LatLng(products.getProduct_latitude(),products.getProduct_longitude());
-
-            findUserAddress(products.getProduct_latitude(), products.getProduct_longitude());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        binding.imgShowAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                    Intent intent = new Intent(ProductDetailActivity.this, MainActivity.class);
-                    intent.putExtra("products", products);
-                    startActivityForResult(intent, 102);
-                    SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(false);
-
-
-
-            }
-        });
-
         //instantiation
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
 
     }
@@ -134,9 +131,14 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
 
          mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        // Add a marker in Sydney and move the camera
+         try{
+             // Add a marker in Sydney and move the camera
              mMap.addMarker(new MarkerOptions().position(latLng).title("Product provider location"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
+             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
+
+         }catch (Exception ex){
+
+         }
 
         if (!isGranted()) {
             requestLocationPermission();
@@ -294,7 +296,7 @@ public class ProductDetailActivity extends AppCompatActivity implements OnMapRea
 
 
             }else {
-                startUpdateLocation();
+                //startUpdateLocation();
             }
         }
     }

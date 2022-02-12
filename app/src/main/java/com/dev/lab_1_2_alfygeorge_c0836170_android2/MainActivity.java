@@ -114,12 +114,12 @@ public class MainActivity extends AppCompatActivity {
 private  final ProductsClickListener productsClickListener = new ProductsClickListener() {
     @Override
     public void onClick(Products products) {
+        SharedPrefHelper.getInstance(getApplicationContext()).setBolIsSaved(true);
 
-      if(!SharedPrefHelper.getInstance(getApplicationContext()).getBolIsSaved()) {
             Intent intent = new Intent(MainActivity.this, ProductDetailActivity.class);
             intent.putExtra("products", products);
             startActivityForResult(intent, 101);
-       }
+
     }
 
     @Override
